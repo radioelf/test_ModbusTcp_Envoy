@@ -189,7 +189,7 @@ def read_measurements():
                     if high_word_id is not None and low_word_id is not None:
                     # Desplazar la parte alta 16 bits a la izquierda y combinar con la parte baja y dividir por 1000000
                        valor_32 = ((high_word_id << 16) | low_word_id) / 1000000
-                       log_message(f"🔹 Total producción : {valor_32} Mwh")
+                       log_message(f"🔹 Total producción : {valor_32} Mwh (40091, 40092)")
                        high_word_id = None
                        low_word_id = None
                     
