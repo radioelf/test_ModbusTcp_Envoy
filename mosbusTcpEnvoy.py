@@ -102,19 +102,22 @@ def read_sunspec_block():
             return False
         finally:
             client.close()
-            log_message("\n🔌 Conexión SunSpec cerrada")
+            log_message("🔌 Conexión SunSpec cerrada\n")
     else:
         log_message("⛔ Fallo conexión SunSpec")
         return False
 
 # --- Función para leer registros de medición ---
 def read_measurements():
+    high_word_id = None
+    low_word_id = None
+    valor_32 = None
     client = ModbusTcpClient(host=ip, port=port)
     if client.connect():
         log_message("✅ Conectado para mediciones")
         try:
             start = 40070
-            count = 21  # 40070-40090
+            count = 27  # 40070-40096
             log_message(f"📋 Leyendo {count} registros de medición desde {start}...")
             
             response = client.read_holding_registers(address=start, count=count, slave=unit_id)
@@ -132,23 +135,76 @@ def read_measurements():
                 for i, val in enumerate(registers):
                     current_address = start + i
                     
-                    # Producción solar
-                    if current_address == 40080:
-                        log_message(f"🔹 Producción solar: {val} W")
+                    # Bloque de lectura de registros
+                    if current_address == 40070:
+                        high_word_id = val
+                    elif current_address == 40071:
+                        low_word_id = val
+                    # Combinar las dos partes para obtener el ID completo
+                    if high_word_id is not None and low_word_id is not None:
+                    # Desplazar la parte alta 16 bits a la izquierda y combinar con la parte baja
+                       valor_32 = (high_word_id << 16) | low_word_id
+                       log_message(f"✨ ID del Modelo SunSpec Combinado: {valor_32}")
+                       high_word_id = None
+                       low_word_id = None
+                       
+                    # Potencia solar (40080)
+                    elif current_address == 40080:
+                        log_message(f"🔹 Potencia solar: {val} W (40080)")
                     
-                    # Tensión de red (40086)
+                    # Potencia aparente solar (40081)
+                    elif current_address == 40081:
+                        log_message(f"🔹 Potencia aparente solar: {val} VA (40081)")  
+                    
+                    # Potencia reactiva solar (40082)
+                    elif current_address == 40082:
+                        log_message(f"🔹 Potencia reactiva solar: {val} VA (40082)")   
+                        
+                    # Factor de potencia (40083)
+                    elif current_address == 40083:
+                        current = val / 100.0
+                        log_message(f"🔹 Factor potencia: {current} Fp (40083)")
+                        
+                    # Producción solar (40084
+                    elif current_address == 40084:
+                        current = val / 100.0
+                        log_message(f"🔹 Corriente solar: {current} A (40084)")
+                    
+                    # Corriente fotovoltaica (40086)
                     elif current_address == 40086:
                         voltage = val / 100.0
                         log_message(f"🔹 Tensión de Red: {voltage:.2f} V (40086)")
-                    
+
                     # Frecuencia (40088)
                     elif current_address == 40088:
                         frequency = val / 100.0
                         log_message(f"🔹 Frecuencia: {frequency:.2f} Hz (40088)")
                     
-                    # Otros registros relevantes
-                    elif current_address in [40070, 40071, 40081, 40082, 40084, 40091, 40092, 40096]:
-                        log_message(f"🔹 Registro {current_address}: {val}")
+                    if current_address == 40091:
+                        high_word_id = val
+                    elif current_address == 40092:
+                        low_word_id = val
+                    # Combinar las dos partes para obtener el ID completo
+                    if high_word_id is not None and low_word_id is not None:
+                    # Desplazar la parte alta 16 bits a la izquierda y combinar con la parte baja y dividir por 1000000
+                       valor_32 = ((high_word_id << 16) | low_word_id) / 1000000
+                       log_message(f"🔹 Total producción : {valor_32} Mwh")
+                       high_word_id = None
+                       low_word_id = None
+                    
+                    # Tipo de conexión eléctrica(40096)
+                    elif current_address == 40096:
+                        if val == 111:
+                           log_message(f"🔹 Una fase activa + neutro (40096)")
+                        elif val == 112:
+                           log_message(f"🔹Dos fases opuestas de 120°(40096)")
+                        elif val == 113:
+                            log_message(f"🔹 Trifásico (40096)")
+                    
+                    # Otros registros desconocidos
+                    elif current_address in [40072, 40073, 40074, 40075, 40076, 40077, 40078, 40079, 40085, 40087, 40089, 40090, 40093, 40094, 40095]:
+                        if val not in [0, 32768, 65534, 65535]:
+                          log_message(f"🔹 Registro {current_address}: {val}")
                 
                 log_message("-" * 70, print_to_console=False)
                 return True
@@ -160,7 +216,7 @@ def read_measurements():
             return False
         finally:
             client.close()
-            log_message("\n🔌 Conexión mediciones cerrada")
+            log_message("🔌 Conexión mediciones cerrada\n")
     else:
         log_message("⛔ Fallo conexión mediciones")
         return False
