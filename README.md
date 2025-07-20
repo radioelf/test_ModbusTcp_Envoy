@@ -14,12 +14,18 @@ El script realiza dos tipos de lecturas:
 2. Monitoreo continuo de mediciones
 
     Se ejecuta en bucle cada 5 segundos
-    Lee los registros 40070-40090
+    Lee los registros 40070-40096
     Extrae valores como (NO verificado):
         Potencia de prodicción fotovoltaica (40080)
+        Potencia aparente forovoltaica (40081)
+        Potencia reactiva fotovoltaica (40082)
+        Factor de potencia (40083)
+        Corriente (40084)
         Tensión de red (40086)
         Frecuencia (40088)
-        Otros registros relevantes y desconocidos (40081, 40082, etc.)
+        Producción total fotovoltaica (40091 y 40092)
+        Tipo de instalación electrica (40096)
+        Otros registros desconocidos (40072, 40073, etc.)
 
 Limitaciones y notas
 
