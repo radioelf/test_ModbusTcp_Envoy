@@ -82,7 +82,7 @@ def read_sunspec_block():
                     model = bytes(model_bytes).decode('ascii').split('\x00')[0]
                     log_message(f"🔹 Modelo: {model} (40020-40022)")
                 
-                # Número de Serie (40044-40048)
+                # Versióm (40044-40048)
                 if len(registers) >= 49:
                     serial_bytes = []
                     for i in range(5):
@@ -91,6 +91,19 @@ def read_sunspec_block():
                         serial_bytes.append(word & 0xFF)
                     serial = bytes(serial_bytes).decode('ascii').split('\x00')[0]
                     log_message(f"🔹 Versión Envoy: {serial} (40044-40048)")
+
+                # Número de Serie (40052–40057)
+                if len(registers) >= 58:  # Asegurarse de que llega al menos hasta el 40057
+                   serial_bytes = []
+                   for i in range(6):  # 6 registros = 12 caracteres
+                      word = registers[52 + i]  # Comenzamos desde 40052
+                      serial_bytes.append((word >> 8) & 0xFF)  # Byte alto
+                      serial_bytes.append(word & 0xFF)         # Byte bajo
+                   try:
+                      serial = bytes(serial_bytes).decode('ascii').strip('\x00').strip()
+                      log_message(f"🔹 Número de serie (Envoy): {serial} (40052–40057)")
+                   except UnicodeDecodeError:
+                      log_message("⚠️ Error al decodificar el número de serie como ASCII.")
                 
                 log_message("-" * 70, print_to_console=False)
                 return True
