@@ -10,8 +10,9 @@ El script realiza dos tipos de lecturas:
         Información del fabricante ("ENPHASE ENERGY")
         Modelo del dispositivo ("Envoy")
         versión de firmware
+        Número de serie
 
-2. Monitoreo continuo de mediciones
+3. Monitoreo continuo de mediciones
 
     Se ejecuta en bucle cada 5 segundos
     Lee los registros 40070-40096
