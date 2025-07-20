@@ -165,12 +165,12 @@ def read_measurements():
                         current = val / 100.0
                         log_message(f"🔹 Factor potencia: {current} Fp (40083)")
                         
-                    # Producción solar (40084
+                    # Intensidad solar (40084
                     elif current_address == 40084:
                         current = val / 100.0
                         log_message(f"🔹 Corriente solar: {current} A (40084)")
                     
-                    # Corriente fotovoltaica (40086)
+                    # Tensión fotovoltaica (40086)
                     elif current_address == 40086:
                         voltage = val / 100.0
                         log_message(f"🔹 Tensión de Red: {voltage:.2f} V (40086)")
@@ -179,7 +179,8 @@ def read_measurements():
                     elif current_address == 40088:
                         frequency = val / 100.0
                         log_message(f"🔹 Frecuencia: {frequency:.2f} Hz (40088)")
-                    
+
+                    # Total producción solar
                     if current_address == 40091:
                         high_word_id = val
                     elif current_address == 40092:
